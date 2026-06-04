@@ -553,11 +553,15 @@ public class RecommendationService {
             Mood primary, Mood secondary, ContentType contentType,
             ExperienceType experienceType, String exclude) {
 
-        List<Recommendation> primaryPool = RECOMMENDATIONS.get(primary).get(contentType);
+        // contentType is null when the chosen format skips the movie/series step
+        // (e.g. ANIME, DOCUMENTARY); fall back to the "no preference" pool.
+        ContentType effectiveType = (contentType != null) ? contentType : ContentType.EITHER;
+
+        List<Recommendation> primaryPool = RECOMMENDATIONS.get(primary).get(effectiveType);
         List<Recommendation> candidates  = new ArrayList<>(primaryPool);
 
         if (secondary != null) {
-            List<Recommendation> secondaryPool = RECOMMENDATIONS.get(secondary).get(contentType);
+            List<Recommendation> secondaryPool = RECOMMENDATIONS.get(secondary).get(effectiveType);
             for (Recommendation r : secondaryPool) {
                 if (r.getExperienceType() == experienceType
                         && primaryPool.stream().noneMatch(p -> p.getTitle().equals(r.getTitle()))) {
