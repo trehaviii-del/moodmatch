@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMatch — Pick a format</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .container { text-align: center; max-width: 860px; width: 100%; }
+
+        .context-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .ctx-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.88rem;
+            color: #a0aec0;
+        }
+        .ctx-badge .emoji { font-size: 1rem; }
+        .ctx-badge .hi    { font-weight: 600; color: #e94560; }
+        .ctx-badge .plus  { color: #4a5568; font-size: 0.75rem; }
+
+        h2 { font-size: 2rem; margin-bottom: 10px; }
+        .subtitle { font-size: 0.95rem; color: #718096; margin-bottom: 38px; }
+
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .fmt-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.11);
+            border-radius: 16px;
+            padding: 24px 14px;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            color: #fff;
+            font-family: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .fmt-btn:hover {
+            background: rgba(123, 94, 167, 0.2);
+            border-color: #7b5ea7;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 22px rgba(123, 94, 167, 0.28);
+        }
+
+        .fmt-btn .emoji { font-size: 1.9rem; }
+        .fmt-btn .label { font-size: 0.95rem; font-weight: 700; }
+        .fmt-btn .desc  { font-size: 0.75rem; color: #718096; line-height: 1.35; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #a0aec0; }
+
+        @media (max-width: 680px) {
+            .format-grid { grid-template-columns: repeat(2, 1fr); }
+            h2 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="context-row">
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${mood.emoji}"></span>
+            <span class="hi" th:text="${mood.displayName}"></span>
+        </span>
+        <span class="ctx-badge" th:if="${secondMood != null}">
+            <span class="plus">+</span>
+            <span class="emoji" th:text="${secondMood.emoji}"></span>
+            <span class="hi" th:text="${secondMood.displayName}"></span>
+        </span>
+    </div>
+
+    <h2>What kind of content?</h2>
+    <p class="subtitle">Pick the format and we'll tailor the search.</p>
+
+    <div class="format-grid">
+        <form th:each="fmt : ${formats}" method="post" action="/select-subformat" style="display:contents">
+            <input type="hidden" name="mood"       th:value="${mood.name()}"/>
+            <input type="hidden" name="secondMood" th:value="${secondMood != null ? secondMood.name() : ''}"/>
+            <input type="hidden" name="format"     th:value="${fmt.name()}"/>
+            <button type="submit" class="fmt-btn">
+                <span class="emoji" th:text="${fmt.emoji}"></span>
+                <span class="label" th:text="${fmt.displayName}"></span>
+                <span class="desc"  th:text="${fmt.description}"></span>
+            </button>
+        </form>
+    </div>
+
+    <a th:href="@{/select-second-mood(mood=${mood.name()})}" class="back-link">← Back</a>
+</div>
+</body>
+</html>

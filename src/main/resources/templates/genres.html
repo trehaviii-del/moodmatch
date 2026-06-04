@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMatch — Anything to avoid?</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .container { text-align: center; max-width: 620px; width: 100%; }
+
+        .context-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .ctx-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.88rem;
+            color: #a0aec0;
+        }
+        .ctx-badge .emoji { font-size: 1rem; }
+        .ctx-badge .hi    { font-weight: 600; color: #e94560; }
+        .ctx-badge .plus  { color: #4a5568; font-size: 0.75rem; }
+
+        h2 { font-size: 2rem; margin-bottom: 10px; }
+        .subtitle { font-size: 0.9rem; color: #718096; margin-bottom: 36px; line-height: 1.5; }
+
+        /* ── genre pill toggle (CSS-only, no JS) ── */
+        .pills-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+
+        .pill-unit { display: inline-flex; }
+
+        input[type="checkbox"].genre-cb { display: none; }
+
+        label.genre-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #cbd5e0;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        label.genre-pill:hover {
+            border-color: rgba(255,255,255,0.35);
+            color: #fff;
+        }
+
+        /* checked = excluded → red / struck */
+        input.genre-cb:checked + label.genre-pill {
+            background: rgba(233, 69, 96, 0.15);
+            border-color: #e94560;
+            color: #e94560;
+            text-decoration: line-through;
+            text-decoration-color: rgba(233, 69, 96, 0.55);
+        }
+
+        .btn-continue {
+            display: inline-block;
+            padding: 13px 38px;
+            background: #e94560;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s ease;
+        }
+        .btn-continue:hover {
+            background: #c73652;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #a0aec0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="context-row">
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${mood.emoji}"></span>
+            <span class="hi" th:text="${mood.displayName}"></span>
+        </span>
+        <span class="ctx-badge" th:if="${secondMood != null}">
+            <span class="plus">+</span>
+            <span class="emoji" th:text="${secondMood.emoji}"></span>
+            <span class="hi" th:text="${secondMood.displayName}"></span>
+        </span>
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${format.emoji}"></span>
+            <span th:text="${format.displayName}"></span>
+        </span>
+        <span class="ctx-badge" th:if="${contentType != null}">
+            <span class="emoji" th:text="${contentType.emoji}"></span>
+            <span th:text="${contentType.displayName}"></span>
+        </span>
+    </div>
+
+    <h2>Anything you'd rather skip?</h2>
+    <p class="subtitle">Tap a genre to exclude it — we'll make sure it never shows up.<br>Leave everything as-is to accept all genres.</p>
+
+    <form method="post" action="/select-experience">
+        <input type="hidden" name="mood"        th:value="${mood.name()}"/>
+        <input type="hidden" name="secondMood"  th:value="${secondMood != null ? secondMood.name() : ''}"/>
+        <input type="hidden" name="format"      th:value="${format.name()}"/>
+        <input type="hidden" name="contentType" th:value="${contentType != null ? contentType.name() : ''}"/>
+
+        <div class="pills-wrap">
+            <div class="pill-unit" th:each="g : ${genres}">
+                <input type="checkbox"
+                       class="genre-cb"
+                       th:id="${'g_' + g.name()}"
+                       name="excludedGenre"
+                       th:value="${g.name()}"/>
+                <label th:for="${'g_' + g.name()}" class="genre-pill">
+                    <span th:text="${g.emoji}"></span>
+                    <span th:text="${g.displayName}"></span>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-continue">Continue →</button>
+    </form>
+
+    <br>
+    <a th:href="${format.needsContentTypeStep
+        ? '/select-content-type?mood=' + mood.name() + '&secondMood=' + (secondMood != null ? secondMood.name() : '') + '&format=' + format.name()
+        : '/select-format?mood=' + mood.name() + '&secondMood=' + (secondMood != null ? secondMood.name() : '')}"
+       class="back-link">← Back</a>
+</div>
+</body>
+</html>

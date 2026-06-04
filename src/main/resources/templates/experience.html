@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMatch — What kind of experience?</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .container { text-align: center; max-width: 680px; width: 100%; }
+
+        .context-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 34px;
+        }
+
+        .ctx-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.88rem;
+            color: #a0aec0;
+        }
+        .ctx-badge .emoji { font-size: 1rem; }
+        .ctx-badge .hi    { font-weight: 600; color: #e94560; }
+        .ctx-badge .plus  { color: #4a5568; margin: 0 2px; }
+
+        h2 { font-size: 2rem; margin-bottom: 10px; }
+        .subtitle { font-size: 0.95rem; color: #718096; margin-bottom: 40px; }
+
+        .exp-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .exp-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.11);
+            border-radius: 18px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: #fff;
+            font-family: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .exp-btn:hover {
+            background: rgba(233, 69, 96, 0.15);
+            border-color: #e94560;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(233, 69, 96, 0.22);
+        }
+
+        .exp-btn .emoji { font-size: 2.4rem; }
+        .exp-btn .title { font-size: 1.15rem; font-weight: 700; }
+        .exp-btn .desc  { font-size: 0.82rem; color: #718096; line-height: 1.4; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 32px;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #a0aec0; }
+
+        @media (max-width: 480px) {
+            .exp-grid { grid-template-columns: 1fr; }
+            h2 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="context-row">
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${mood.emoji}"></span>
+            <span class="hi" th:text="${mood.displayName}"></span>
+        </span>
+        <span class="ctx-badge" th:if="${secondMood != null}">
+            <span class="plus">+</span>
+            <span class="emoji" th:text="${secondMood.emoji}"></span>
+            <span class="hi" th:text="${secondMood.displayName}"></span>
+        </span>
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${format.emoji}"></span>
+            <span th:text="${format.displayName}"></span>
+        </span>
+        <span class="ctx-badge" th:if="${contentType != null}">
+            <span class="emoji" th:text="${contentType.emoji}"></span>
+            <span th:text="${contentType.displayName}"></span>
+        </span>
+    </div>
+
+    <h2>What kind of experience?</h2>
+    <p class="subtitle">One last question — this shapes the final pick.</p>
+
+    <div class="exp-grid">
+        <form th:each="exp : ${experienceTypes}" method="post" action="/recommend" style="display:contents">
+            <input type="hidden" name="mood"           th:value="${mood.name()}"/>
+            <input type="hidden" name="secondMood"     th:value="${secondMood != null ? secondMood.name() : ''}"/>
+            <input type="hidden" name="format"         th:value="${format.name()}"/>
+            <input type="hidden" name="contentType"    th:value="${contentType != null ? contentType.name() : ''}"/>
+            <input type="hidden" name="excludedGenres" th:value="${excludedGenres}"/>
+            <input type="hidden" name="experienceType" th:value="${exp.name()}"/>
+            <button type="submit" class="exp-btn">
+                <span class="emoji" th:text="${exp.emoji}"></span>
+                <span class="title" th:text="${exp.displayName}"></span>
+                <span class="desc"  th:text="${exp.description}"></span>
+            </button>
+        </form>
+    </div>
+
+    <a th:href="@{/select-genres(mood=${mood.name()}, secondMood=${secondMood != null ? secondMood.name() : ''}, format=${format.name()}, contentType=${contentType != null ? contentType.name() : ''})}"
+       class="back-link">← Back</a>
+</div>
+</body>
+</html>

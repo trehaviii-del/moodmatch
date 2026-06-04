@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMatch</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #e94560, #7b5ea7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.15rem;
+            color: #a0aec0;
+            margin-bottom: 48px;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .mood-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 22px 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .mood-btn:hover {
+            background: rgba(233, 69, 96, 0.18);
+            border-color: #e94560;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(233, 69, 96, 0.25);
+        }
+
+        .mood-btn .emoji { font-size: 2rem; }
+        .mood-btn .label { font-weight: 600; letter-spacing: 0.3px; }
+
+        @media (max-width: 700px) {
+            .mood-grid { grid-template-columns: repeat(3, 1fr); }
+            h1 { font-size: 2.2rem; }
+        }
+
+        @media (max-width: 440px) {
+            .mood-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>MoodMatch</h1>
+    <p class="subtitle">How are you feeling right now? We'll find the perfect watch for you.</p>
+
+    <div class="mood-grid">
+        <form th:each="mood : ${moods}" method="post" action="/select-second-mood" style="display:contents">
+            <input type="hidden" name="mood" th:value="${mood.name()}"/>
+            <button type="submit" class="mood-btn">
+                <span class="emoji" th:text="${mood.emoji}"></span>
+                <span class="label" th:text="${mood.displayName}"></span>
+            </button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

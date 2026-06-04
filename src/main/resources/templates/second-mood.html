@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMatch — Add a second mood?</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .container { text-align: center; max-width: 700px; width: 100%; }
+
+        .primary-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(233, 69, 96, 0.12);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-size: 1rem;
+            margin-bottom: 32px;
+            color: #cbd5e0;
+        }
+        .primary-badge .emoji { font-size: 1.3rem; }
+        .primary-badge .name { font-weight: 600; color: #e94560; }
+
+        h2 { font-size: 2rem; margin-bottom: 10px; }
+
+        .subtitle { font-size: 0.95rem; color: #718096; margin-bottom: 40px; }
+
+        .compat-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .mood-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 20px 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: #fff;
+            font-family: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-width: 110px;
+        }
+
+        .mood-btn:hover {
+            background: rgba(123, 94, 167, 0.2);
+            border-color: #7b5ea7;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 22px rgba(123, 94, 167, 0.28);
+        }
+
+        .mood-btn .emoji { font-size: 1.8rem; }
+        .mood-btn .label { font-size: 0.9rem; font-weight: 600; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 4px 0 24px;
+            color: #4a5568;
+            font-size: 0.8rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+        }
+
+        .skip-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 12px 28px;
+            color: #a0aec0;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .skip-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 28px;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #a0aec0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="primary-badge">
+        <span class="emoji" th:text="${primaryMood.emoji}"></span>
+        Feeling <span class="name" th:text="${primaryMood.displayName}"></span>
+    </div>
+
+    <h2>Want to add a second mood?</h2>
+    <p class="subtitle">Layering moods leads to a more tailored recommendation.</p>
+
+    <div class="compat-grid">
+        <form th:each="m : ${compatibleMoods}" method="post" action="/select-format" style="display:contents">
+            <input type="hidden" name="mood"       th:value="${primaryMood.name()}"/>
+            <input type="hidden" name="secondMood" th:value="${m.name()}"/>
+            <button type="submit" class="mood-btn">
+                <span class="emoji" th:text="${m.emoji}"></span>
+                <span class="label" th:text="${m.displayName}"></span>
+            </button>
+        </form>
+    </div>
+
+    <div class="divider">or</div>
+
+    <form method="post" action="/select-format">
+        <input type="hidden" name="mood" th:value="${primaryMood.name()}"/>
+        <button type="submit" class="skip-btn">Just this one — continue →</button>
+    </form>
+
+    <br>
+    <a href="/" class="back-link">← Pick a different mood</a>
+</div>
+</body>
+</html>

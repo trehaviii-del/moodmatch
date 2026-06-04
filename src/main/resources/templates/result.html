@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMatch — Your Recommendation</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 40px 20px;
+        }
+
+        .container { text-align: center; max-width: 580px; width: 100%; }
+
+        .context-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 36px;
+        }
+
+        .ctx-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.13);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            color: #a0aec0;
+        }
+        .ctx-badge .emoji { font-size: 0.95rem; }
+        .ctx-badge .hi    { font-weight: 600; color: #e94560; }
+        .ctx-badge .plus  { color: #4a5568; font-size: 0.72rem; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: 22px;
+            padding: 42px 38px;
+            backdrop-filter: blur(10px);
+            text-align: left;
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(255,255,255,0.09);
+            padding-bottom: 22px;
+            margin-bottom: 26px;
+        }
+
+        .title {
+            font-size: 1.9rem;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 14px;
+        }
+
+        .meta-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .meta-badge {
+            background: rgba(233, 69, 96, 0.15);
+            border: 1px solid rgba(233, 69, 96, 0.35);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.88rem;
+            color: #e94560;
+        }
+
+        .reason-label {
+            font-size: 0.78rem;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 10px;
+        }
+
+        .reason-text { font-size: 1.05rem; line-height: 1.75; color: #cbd5e0; }
+
+        .seen-row { margin-top: 18px; margin-bottom: -8px; text-align: center; }
+
+        .btn-another {
+            display: block;
+            width: 100%;
+            padding: 0;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-another-inner {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px dashed rgba(255,255,255,0.2);
+            color: #718096;
+            font-size: 0.88rem;
+            transition: all 0.25s ease;
+        }
+        .btn-another:hover .btn-another-inner { border-color: rgba(255,255,255,0.45); color: #cbd5e0; }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .btn-primary {
+            padding: 13px 28px;
+            background: #e94560;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .btn-primary:hover {
+            background: #c73652;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn-secondary {
+            padding: 13px 28px;
+            background: transparent;
+            color: #a0aec0;
+            text-decoration: none;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+        }
+        .btn-secondary:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="context-row">
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${mood.emoji}"></span>
+            <span class="hi" th:text="${mood.displayName}"></span>
+        </span>
+        <span class="ctx-badge" th:if="${secondMood != null}">
+            <span class="plus">+</span>
+            <span class="emoji" th:text="${secondMood.emoji}"></span>
+            <span class="hi" th:text="${secondMood.displayName}"></span>
+        </span>
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${format.emoji}"></span>
+            <span th:text="${format.displayName}"></span>
+        </span>
+        <span class="ctx-badge" th:if="${contentType != null}">
+            <span class="emoji" th:text="${contentType.emoji}"></span>
+            <span th:text="${contentType.displayName}"></span>
+        </span>
+        <span class="ctx-badge">
+            <span class="emoji" th:text="${experienceType.emoji}"></span>
+            <span th:text="${experienceType.displayName}"></span>
+        </span>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="title" th:text="${recommendation.title}"></h2>
+            <div class="meta-badges">
+                <span class="meta-badge" th:text="${recommendation.year}"></span>
+                <span class="meta-badge" th:text="${recommendation.genre}"></span>
+            </div>
+        </div>
+        <p class="reason-label">Why it fits</p>
+        <p class="reason-text" th:text="${recommendation.reason}"></p>
+    </div>
+
+    <div class="seen-row">
+        <form method="post" action="/recommend" style="display:inline">
+            <input type="hidden" name="mood"           th:value="${mood.name()}"/>
+            <input type="hidden" name="secondMood"     th:value="${secondMood != null ? secondMood.name() : ''}"/>
+            <input type="hidden" name="format"         th:value="${format.name()}"/>
+            <input type="hidden" name="contentType"    th:value="${contentType != null ? contentType.name() : ''}"/>
+            <input type="hidden" name="excludedGenres" th:value="${excludedGenres}"/>
+            <input type="hidden" name="experienceType" th:value="${experienceType.name()}"/>
+            <input type="hidden" name="exclude"        th:value="${recommendation.title}"/>
+            <button type="submit" class="btn-another">
+                <span class="btn-another-inner">🔀 Already seen this? Show me another</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="actions">
+        <a th:href="@{/select-format(mood=${mood.name()}, secondMood=${secondMood != null ? secondMood.name() : ''})}"
+           class="btn-secondary">Change format</a>
+        <a href="/" class="btn-primary">Pick a new mood</a>
+    </div>
+</div>
+</body>
+</html>
